@@ -4,14 +4,15 @@ import expressJwt from 'express-jwt'
 import config from '../../config/config'
 
 
-const signin = (req, res) => {
+const signin = async (req, res) => {
     try{
-        let user = User.findOne({"email": req.body.email})
+        let user = await User.findOne({"email": req.body.email})
         if(!user){
             return res.status(401).json({
                 error: "User not found"
             })
         }
+        
         if(!user.authenticate(req.body.password)){
             return res.status(401).json({
                 error: "Email and password don't match"
@@ -29,8 +30,9 @@ const signin = (req, res) => {
             }
         })
     } catch(err){
+        console.log(err)
         return res.status(401).json({
-            error: "Could not sign in"
+            error: 'Could not sign in'
         })
     }
 }
@@ -44,7 +46,8 @@ const signout = (req, res) => {
 
 const requireSignin = expressJwt({
     secret: config.jwtSecret,
-    userProperty: 'auth'
+    userProperty: 'auth',
+    algorithms: ['HS256']
 })
 
 const hasAuthorization = (req, res, next) => {

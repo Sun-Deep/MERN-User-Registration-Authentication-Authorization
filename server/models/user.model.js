@@ -1,4 +1,5 @@
-import mongoose, { mongo } from 'mongoose'
+import mongoose from 'mongoose'
+import crypto from 'crypto'
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -27,7 +28,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema
     .virtual('password')
-    .set(password => {
+    .set(function(password){
         this._password = password
         this.salt = this.makeSalt()
         this.hashed_password = this.encryptPassword(password)
@@ -48,10 +49,10 @@ UserSchema.path('hashed_password').validate(function(v) {
 
 
 UserSchema.methods = {
-    authenticate: (plainText) => {
+    authenticate: function(plainText){
         return this.encryptPassword(plainText) === this.hashed_password
     },
-    encryptPassword: (password) => {
+    encryptPassword: function(password){
         if(!password) return ''
         try{
             return crypto
